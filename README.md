@@ -53,11 +53,12 @@ The rest of the parameters are provided as command line arguments
 | Health command |   4        | Currently unused       |
 | Health seconds | 5          | Time where both deployments will co-exist |
 | Namespace |     6           | Kubernetes namespace that will be used |
+| K8S labels |    7           | Use the version [kubernetes recomended labels](https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/) |
 
 Here is an example:
 
 ```
-./k8s-blue-green.sh myService myApp 73df943 true 30 my-namespace
+./k8s-blue-green.sh myService myApp 73df943 true 30 my-namespace true
 ```
 
 
@@ -79,6 +80,7 @@ For the `KUBE_CONTEXT` environment variable just use the name of your cluster as
       - HEALTH_SECONDS=60
       - NAMESPACE=colors
       - KUBE_CONTEXT=myDemoAKSCluster
+      - RECOMMENDED_LABEL=true
 ```
 
 The `CF_SHORT_REVISION` variable is offered by Codefresh and contains the git hash of the version that was just pushed. See all variables in the [official documentation](https://codefresh.io/docs/docs/codefresh-yaml/variables/)
