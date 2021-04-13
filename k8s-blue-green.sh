@@ -41,8 +41,14 @@ mainloop(){
     echo "[DEPLOY INFO] Selecting Kubernetes cluster"
     kubectl config use-context "${KUBE_CONTEXT}"
 
+   if [ "$RECOMMENDED_LABEL" == "false" ]; then
+       LABEL="version"
+    else
+       LABEL='app\.kubernetes\.io\/version'
+    fi
+
     echo "[DEPLOY INFO] Locating current version"
-    CURRENT_VERSION=$(kubectl get service $SERVICE_NAME -o go-template=$'{{index .spec.selector "app.kubernetes.io/version"}}' --namespace=${NAMESPACE})
+    CURRENT_VERSION=$(kubectl get service $SERVICE_NAME -o jsonpath="{['spec']['selector']['${LABEL}']}" --namespace=${NAMESPACE})
 
     if [ "$CURRENT_VERSION" == "$NEW_VERSION" ]; then
        echo "[DEPLOY NOP] NEW_VERSION is same as CURRENT_VERSION. Both are at $CURRENT_VERSION"
@@ -69,13 +75,14 @@ mainloop(){
 
 }
 
-if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" != "" ] && [ "$4" != "" ] && [ "$5" != "" ] && [ "$6" != "" ]; then
+if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" != "" ] && [ "$4" != "" ] && [ "$5" != "" ] && [ "$6" != "" ] && [ "$7" != "" ]; then
     SERVICE_NAME=$1
     DEPLOYMENT_NAME=$2
     NEW_VERSION=$3
     HEALTH_COMMAND=$4
     HEALTH_SECONDS=$5
     NAMESPACE=$6
+    RECOMMENDED_LABEL=$7
 else
 
     echo "USAGE\n k8s-blue-green-rollout.sh [SERVICE_NAME] [DEPLOYMENT_NAME] [NEW_VERSION] [HEALTH_COMMAND] [HEALTH_SECONDS] [NAMESPACE]"
@@ -85,6 +92,7 @@ else
     echo "\t [HEALTH_COMMAND] - command to use as a health check (unused)"
     echo "\t [HEALTH_SECONDS] - Time to wait before checking health"
     echo "\t [NAMESPACE] - Namespace of the application"
+    echo "\t [RECOMMENDED_LABEL] - Use the recommended label version 'app.kubernetes.io/version (default is false)"
     exit 1;
 fi
 
